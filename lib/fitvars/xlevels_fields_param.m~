@@ -45,7 +45,7 @@ x = distance';
 y = varA(deep,:);
 
        Input2 = real(lsqFit2(deep,:));
-Lewq2(deep,:) = funFit2(Input2,xxx);
+Lewq2(deep,:) = funFit2(Input2,xxx).*Anom(deep);
 
        Input3 = real(lsqFit3(deep,:));
 Lewq3(deep,:) = funFit3(Input3,xxx);

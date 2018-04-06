@@ -124,6 +124,7 @@ no_param=3; % 3:fixed alpha; 4:All parameters fitted
 % alpha_0 = 2;
 % Input_0 = [Ta0,coef_0,R0,alpha_0];
 %
+run([path_lib, '/fitvars/fit_rhoA_param2.m']) 
 run([path_lib, '/fitvars/fit_rhoA_param3.m']) 
 run([path_lib, '/fitvars/fit_rhoA_param4.m']) 
 run([path_lib, '/fitvars/fit_salA_param3.m']) 

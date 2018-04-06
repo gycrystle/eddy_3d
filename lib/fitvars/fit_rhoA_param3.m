@@ -36,14 +36,22 @@ filesave = [path_io, 'sortN_',num2str(field{f}),'_fitparam3.mat'];
 %FITTING 
 %First guess fitting parameters
      Ta0 = -0.5;
-     R0 = 10;
- coef_0 = 1e-3;
-alpha_0 = 2;
-Input_0 = [Ta0,coef_0,R0];
+     R0 = 30;
+ coef_0 = 1e-6;
+alpha_0 = 4.0;
+%Input_0 = [Ta0,coef_0,R0];
+Input_0 = [Ta0,coef_0,R0,alpha_0];
 
-%Function & Method
-funFit=@(Input,r)( real(Input(1)) + real(Input(2)).*r.^2 )...
-      .* exp(-(1/2).*(abs(r).^2) ./(real(Input(3))^2));
+
+%Function & Method  exp(-(1/real(Input(4)))
+% funFit=@(Input,r)( real(Input(1)) + real(Input(2)).*r.^2 )...
+%       .* exp(-(1/alpha_0).*(abs(r).^alpha_0) ./(real(Input(3))^alpha_0));
+
+funFit=@(Input,r)( real(Input(1)) + coef_0.*r.^2 )...
+      .* exp(-(1/real(Input(4))).*(abs(r).^real(Input(4))) ./(real(Input(3))^real(Input(4))));
+% funFit=@(Input,r)( real(Input(1)) + coef_0.*r.^2 )...
+%       .* exp(-(1/real(Input(2))).*(abs(r).^real(Input(2))) ./(real(Input(3))^real(Input(2))));
+
 
 lsqOpts = optimoptions('lsqcurvefit',...
     'MaxFunEvals', 1e6, 'MaxIter', 1e4,'Display','off'); 
@@ -62,9 +70,9 @@ y = varA(deep,:);
 x(ind) =[];
 y(ind) =[];
 
-   ind = find(x==0);
-x(ind) =[];
-y(ind) =[];
+%    ind = find(x==0);
+% x(ind) =[];
+% y(ind) =[];
 
 if  ~isempty(x)
 
@@ -99,7 +107,7 @@ if  ~isempty(x)
         lsqFit(deep,3) = coef_lsqXY(3);
         
         Rsquare(deep,1) = resnorm;
-%         lsqFit(deep,4) = coef_lsqXY(4);
+        lsqFit(deep,4) = coef_lsqXY(4);
 
                
 
@@ -108,7 +116,7 @@ else
         lsqFit(deep,1) = nan;
         lsqFit(deep,2) = nan;
         lsqFit(deep,3) = nan;
-%         lsqFit(deep,4) = nan;   
+        lsqFit(deep,4) = nan;   
 
         Rsquare(deep,1) = nan;
         
