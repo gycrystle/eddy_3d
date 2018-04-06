@@ -14,11 +14,13 @@ disp(['----- Field: ',num2str(field{f}), '-----'])
 load('../../io/sortI.mat','Isrho','Isort_rad','pres')
   distance = Isort_rad;
        var = Isrho;    
-load('../../io/sortO.mat','Osrho')
-mPvar = nanmean(Osrho,2);
+
+load('../../io/ref_pro.mat','autumn')
+mPvar = autumn.mrho; %%% change the reference 
 ref_varOut = repmat(mPvar,1,length(distance));
       varA = (var - ref_varOut);
        Z = pres(:,1);   
+
      
 %FLAGS & names
 flagplot = 0;
