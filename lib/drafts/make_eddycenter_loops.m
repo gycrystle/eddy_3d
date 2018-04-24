@@ -1,4 +1,6 @@
-%clearvars -except path* eddy*
+clearvars -except path* eddy*
+%spread=843:934; %20 sep- 19 dec for analyzing 10 oct - 30 nov
+spread=835:942; %trying longer period for analyzing 10 oct - 30 nov
 %Load directories & paths
 %................................
 computer ='/home/cgreace/tuto1/';
@@ -15,15 +17,15 @@ path_io = ['',computer,'eddy3D/io/'];
 path_lib =['',computer,'eddy3D/lib/'];
 
 
-load([path_io,'sychronizenew.mat'])
+load([path_io,'data_perargo11.mat'])
 col = {[0.7 0 0 ],'k',[0 0.5 0],'b'};
 lys = {'-','--','--','-'};
-dayi = [2017 01 01 12 0 0];
+dayi = [2015 06 01 12 0 0];
 
-timelims = 27;
-timelime = 127;
+timelims = spread(1);
+timelime = spread(end);
 stepFs = timelime-timelims+1;
-spread = timelims:timelime;
+%spread = timelims:timelime;
 
 openlocalmax = 1;
 figure 
@@ -106,8 +108,8 @@ end
 %%combine min and max and combine argos
 % lon lat not same length so i had to do something eliminate first(2:end)
 % or add more lon before 
-  imaxlon1 = [27;imaxlon1;];
-  imaxlat1 = [   imaxlat1];
+  imaxlon1 = [imaxlon1];
+  imaxlat1 = [imaxlat1];
 
 imllat_nonsort1  = [iminlat1;imaxlat1];
 imllon_nonsort1  = [iminlon1;imaxlon1];
@@ -173,67 +175,67 @@ yargo(k) = mean(lat1(spread)) ;
 yyargo(spread) = yargo(k);
 end  
 
-plot(datenum(time(targo,:)),yargo,'o','Color','k',...
+plot(datenum(time(targo(1:end-1),:)),yargo,'o','Color','k',...
                          'MarkerFaceColor',[0.75 0.75 0],...
                          'MarkerSize',8);  
                      hold on
 
-%Argo4
-subplot(2,1,1)
-k = 0;
-for j = 1:length(imllon4)-1
-k = k+1;
-spread = imllon4(j):imllon4(j+1);
-targo4(k) = round(median(spread))+1
-xargo4(k) = mean(lon4(spread)) ;
-xxargo(spread) = xargo4(k);
-end  
-
-plot(datenum(time(targo4,:)),xargo4,'o','Color','k',...
-                         'MarkerFaceColor',[0 0.5 0.5],...
-                         'MarkerSize',8);  
-                     hold on
-                    
-
-subplot(2,1,2)
-
-k = 0;
-for j = 1:length(imllat4)-1
-k = k+1;
-spread = imllat4(j):imllat4(j+1);
-targo4(k) = round(median(spread))+1;
-yargo4(k) = mean(lat4(spread)) ;
-yyargo(spread) = yargo4(k);
-end  
-
-plot(datenum(time(targo4(1:end-1),:)),yargo4,'o','Color','k',...
-                         'MarkerFaceColor',[0 0.5 0.5],...
-                         'MarkerSize',8);  
-                     hold on
+% %Argo4
+% subplot(2,1,1)
+% k = 0;
+% for j = 1:length(imllon4)-1
+% k = k+1;
+% %spread = imllon4(j):imllon4(j+1);
+% targo4(k) = round(median(spread))+1
+% xargo4(k) = mean(lon4(spread)) ;
+% xxargo(spread) = xargo4(k);
+% end  
+% 
+% plot(datenum(time(targo4,:)),xargo4,'o','Color','k',...
+%                          'MarkerFaceColor',[0 0.5 0.5],...
+%                          'MarkerSize',8);  
+%                      hold on
+%                     
+% 
+% subplot(2,1,2)
+% 
+% k = 0;
+% for j = 1:length(imllat4)-1
+% k = k+1;
+% %spread = imllat4(j):imllat4(j+1);
+% targo4(k) = round(median(spread))+1;
+% yargo4(k) = mean(lat4(spread)) ;
+% yyargo(spread) = yargo4(k);
+% end  
+% 
+% plot(datenum(time(targo4(1:end-1),:)),yargo4,'o','Color','k',...
+%                          'MarkerFaceColor',[0 0.5 0.5],...
+%                          'MarkerSize',8);  
+%                      hold on
 
                      
-for p = 1:length(targo4)    
-    
-    targo4(p)
-    
-    for k = 1:length(time)    
-
-        if  datenum(time(targo4(p),:)) == datenum(time(k,:))
-
-            k;
-            Targo4(p) = k;
-        end
-    end
-    
-    
-    
-end   
+% for p = 1:length(targo4)    
+%     
+%     targo4(p)
+%     
+%     for k = 1:length(time)    
+% 
+%         if  datenum(time(targo4(p),:)) == datenum(time(k,:))
+% 
+%             k;
+%             Targo4(p) = k;
+%         end
+%     end
+%     
+%     
+%     
+% end   
            
 
 
 
 %% Fit line between all the points
-tfitargo = [timelims targo];
+tfitargo = [timelims targo];%spread(1:end-1);%
 xfitargo = [lon1(timelims) xargo]   ;
 yfitargo = [lat1(timelims) yargo] ; 
  
@@ -243,7 +245,7 @@ fitTime  = fittedX;
 
 subplot(2,1,1)
 
-fittedY = interp1(datenum(time(tfitargo,:)),xfitargo',fittedX,'spline');
+fittedY = interp1(datenum(time(tfitargo,:)),xfitargo',fittedX,'linear');
 % Plot the fitted line
 hold on;
 fx =plot(fittedX, fittedY, '-','Color',[0.75 0.75 0], 'LineWidth', 3);
@@ -251,17 +253,17 @@ fitxargo = fittedY;
 fittargo = fittedX;
 %%%.................
 
-ylim([25.2 26.4])
+%ylim([25.2 26.4])
 
 subplot(2,1,2)
 clear fittedY
-fittedY = interp1(datenum(time(tfitargo,:)),yfitargo',fittedX,'spline');
+fittedY = interp1(datenum(time(tfitargo(1:end-1),:)),yfitargo',fittedX,'spline');
 % Plot the fitted line
 hold on;
 fy = plot(fittedX, fittedY, '-','Color',[0.75 0.75 0], 'LineWidth', 3);
 fityargo = fittedY;
 %%%.................
-ylim([33.5 34.4])
+%ylim([33.5 34.4])
 
 
 delete(fx)

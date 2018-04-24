@@ -12,14 +12,20 @@
         notnan = find(~isnan(x(:,a)));
         xx = x(notnan,a);
         yy = y(notnan,a);
+        %namea=name{notnan};
+        if all(isnan(x(:,a)))
+           name(:,a)=[]; %C(2,:) = []
+           info(:,a)=[];
+        end
         m = m_plot(xx,yy,mark{a},'Color',col{a},...
             'MarkerFaceColor',facol{a},...
             'MarkerSize',6,'linewidth',0.3,'linestyle','--');
         
         eval(['m',num2str(a),'= m;'])
-        legendInfo{a} = ['',name{a},' ',info{a},''];
+        
         hold on
     end
+    legendInfo = name;%['',name,' ',info,''];
     legend(legendInfo,'location','southwest')
     t = title(periodT,'fontsize',10);
     set(t, 'horizontalAlignment', 'left')
@@ -43,8 +49,8 @@
     m_plot(autumn.lon, autumn.lat, 'y*','linewidth',0.5,'markersize',6);
     %
     m_plot(mLon,mLat,'k+','linewidth',3,'markersize',10)
-    m_range_ring(mLon,mLat,mRad,'color','r');
-    m_range_ring(mLon,mLat,mRad2,'color','k');
+    m_range_ring(mLon,mLat,mRad,'color','b'); %[1, 0.6, 0.7843]pink outside eddy
+    %m_range_ring(mLon,mLat,mRad2,'color','[0.6,0.8,1]'); %lightblue inside eddy
     %
     % Inmost and outmost profile
     [iout,jout]=find(radius==max(max(radius(find(radius<mRad2)))));

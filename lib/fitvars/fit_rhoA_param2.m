@@ -1,31 +1,32 @@
+clearvars -except eddy* path* no_param;
 
-% clearvars -except eddy eddy_center no_param;
-% clc;close all
-% run(['../paths.m']);
 %Load directories & paths
 %................................
 computer ='/home/cgreace/tuto1/';
 %
-path_io = ['',computer,'eddy3D/io/']
+path_io = ['',computer,'eddy3D/io/'];
 warning off
 
 %LOAD FIELDS
-field = {'tempA','salA','rhoA'};      f = 3; 
+field = {'tempA','salA','rhoA'};      
+fields= {'temp','sal','rho'};
+for f =1:3; 
 disp(['----- Field: ',num2str(field{f}), '-----'])
 
 %load('../../io/sortN.mat','Nsrho','Nsort_rad','pres')
-load('../../io/sortI.mat','Isrho','Isort_rad','pres')
+load('../../io/sortI.mat');
   distance = Isort_rad;%Nsort_rad;
-       var = Isrho;    
+  eval(['var = Is',num2str(fields{f})]);
+           
 load('../../io/sortO.mat','Osrho','mPrhoout')
 load('../../io/ref_pro.mat','autumn')
-mPvar = autumn.mrho; %%% change the reference 
+eval(['mPvar = autumn.m',num2str(fields{f})]);
+%mPvar = autumn.mrho; %%% change the reference 
+
 ref_varOut = repmat(mPvar,1,length(distance));
       varA = (var - ref_varOut);
        Z = pres(:,1);   
      
-     
-       
 %FLAGS & names
 flagplot = 0;
 flagfig  = 0;
@@ -35,10 +36,10 @@ filesave = [path_io, 'sortN_',num2str(field{f}),'_fitparam2.mat'];
        
 %FITTING 
 %First guess fitting parameters
-     Ta0 = -0.5;
+     Ta0 = 0;
      R0 = 30;
  coef_0 = 1e-6;
-alpha_0 = 4.0;
+alpha_0 = 2.0;
 %Input_0 = [Ta0,coef_0,R0];
 Input_0 = [Ta0,coef_0,R0,alpha_0];
 
@@ -72,6 +73,10 @@ y = varA(deep,:);
 x(ind) =[];
 y(ind) =[];
 
+% gaussfittype(deep,:)=fittype('Anom(deep,1)*exp(-((x/Rmax(deep,1))^alpha(deep,1))/alpha(deep,1))',...
+%      'independent','x','problem','alpha(deep,1)','problem','Rmax(deep,1)');
+% %cgaussfit=cfit(%%,,'dependent','rho_anom_sum','problem','alpha'
+% gaussianfit(deep,:)=fit(x',y(deep,:)',gaussfittype);
 
 %    ind = find(x==0);
 % x(ind) =[];
@@ -105,7 +110,7 @@ if  ~isempty(x)
     end
 
 
-        lsqFit(deep,1) = coef_lsqXY(1);
+        lsqFit(deep,1) = Anom(deep,1);%coef_lsqXY(1);
         lsqFit(deep,2) = coef_lsqXY(2);
         lsqFit(deep,3) = coef_lsqXY(3);
         
@@ -127,10 +132,12 @@ else
 end
 
 end
+funFit=@(Input,r)real(Input(1)).*exp(-(1/real(Input(4))).*(abs(r).^real(Input(4)))...
+    ./(real(Input(3))^real(Input(4))));
 
 %Save Fitting 
 if flagsave
 save(filesave,'lsq*','funFit','Z','Rsquare',...
           'distance','var','ref_varOut','varA','see', 'Anom')
 end
-
+end

@@ -1,4 +1,4 @@
-clearvars -except l n level name path_io path_output no_param
+clearvars -except l n level name path* no_param eddy*
 % computer = 'D:/Documents'
 % addpath(['',computer,'/MATLAB/matpalettes'])
 % addpath(['',computer,'/IMED/ANALYSIS/MARGO/argofun'])
@@ -8,16 +8,16 @@ field = {'tempA','salA','rhoA'};      fi = 3;
 disp(['----- Field: ',num2str(field{fi}), '-----'])
 
 file_N=[path_io 'sortN.mat'];
-load(file_N,'Nssal','Nsort_rad','pres')
-  distance = Nsort_rad;
-       var = Nssal;    
-
-file_O=[path_io 'sortO.mat'];
-load(file_O,'Ossal')
-mPvar = nanmean(Ossal,2);
-ref_varOut = repmat(mPvar,1,length(distance));
-      varA = (var - ref_varOut);
-       Z = pres(:,1);      
+load(file_N,'pres')
+%   distance = Nsort_rad;
+%        var = Nssal;    
+% 
+% file_O=[path_io 'sortO.mat'];
+% load(file_O,'Ossal')
+% mPvar = nanmean(Ossal,2);
+% ref_varOut = repmat(mPvar,1,length(distance));
+%       varA = (var - ref_varOut);
+%        Z = pres(:,1);      
        
        
        
@@ -27,21 +27,26 @@ ref_varOut = repmat(mPvar,1,length(distance));
 % prmt = str2num(stv)
 
 
-filesave = ['./fitvars/sortN_',num2str(field{fi}),'_fitparam',num2str(prmt),'.mat'];
+filesave = [path_io, 'sortN_',num2str(field{fi}),'_fitparam',num2str(prmt),'.mat'];
 load(filesave)
 
-r = -100:1:100;
-for deep = 1:400
+r = -120:1:120;
+sdeep=1:200;
+levels = 20:200; % to plot
+pres=pres(sdeep);
+for deep = sdeep
 
        Input = real(lsqFit(deep,:));
-Lewq(deep,:) = funFit(Input,r);
+       eval(['Lewq(deep,:) = funFit',num2str(no_param), '(Input,r);']);  
+%Lewq(deep,:) = funFit(Input,r);
   
 end
 ewq = real(Lewq);
 
 
 hfig = figure;
-pcolor(r,pres,ewq),shading flat
+pcolor(r,pres(levels,:),ewq(levels,:)),shading flat;
+%pcolor(r,pres(:,:),ewq(deep,:)),shading flat
 axis ij
 caxis([-1 1])
 colormap(brewermap(50,'*RdBu'))
@@ -57,7 +62,7 @@ title(c,{'\delta\rho';'(kg/m^3)'})
 hold all
 v = [-1:0.05:1]; 
 v(v==0) = [];
-[C, hT]=contour(r,pres,ewq,v,'k');
+[C, hT]=contour(r,pres(levels,:),ewq(levels,:),v,'k');
 set(hT,'LineWidth',0.5,'Color','k','linestyle','-');
 clabel(C,hT,v,'LabelSpacing',100,'Fontsize',7)    
 set(ax,'linewidth',1)
@@ -77,10 +82,10 @@ lat   = 33.5840;                 % lat of the eddy
 f     = 2*omega.*sind(lat);      % coriolis parameter in lat
 % f = 1e-4;
 
-sdeep  = 1:201;
+%sdeep  = 50:201;
 DrhoA   = ewq(sdeep,:);
-Dprs   = repmat(pres(sdeep),1,length(r));
-Drad   = repmat(r,sdeep(end),1);
+Dprs   = repmat(pres,1,length(r));
+Drad   = repmat(r,size(sdeep,2),1);
 
 
 % GEO
@@ -92,8 +97,8 @@ fdz   = gradient(Dprs')';
 fdv   = -g/(rho0*f)  .*  (fdden./fdr)  .*fdz;
 fdv (isnan(fdv)) = 0;
 
-levels = 10:200;
-fdvv = fdv(levels,:);
+
+fdvv = fdv;%(levels,:);
 vel  = cumsum(fdvv(end:-1:1,:),1);
 velG = flipud(vel);
 
@@ -105,7 +110,7 @@ figure,hold all
 % pcolor(Drad(levels,:),Dprs(levels,:),velG*100),shading flat
 % hold on
 % axis ij
-[C, hT]=contourf(Drad(levels,:),Dprs(levels,:),velG*100,v,'k');
+[C, hT]=contourf(Drad(levels,:),Dprs(levels,:),velG(levels,:)*100,v,'k');
 set(hT,'LineWidth',0.5,'Color','k','linestyle','-');
 clabel(C,hT,v,'LabelSpacing',1000,'Fontsize',10)    
 caxis([-60 60])
@@ -182,9 +187,9 @@ velC = vvC;
 
 
 figure
-[C, hT]=contourf(Drad(:,1:end-1),Dprs(:,1:end-1),velC*100,v,'k');
+[C, hT]=contourf(Drad(levels,1:end-1),Dprs(levels,1:end-1),velC(levels,:)*100,v,'k');
 set(hT,'LineWidth',0.5,'Color','k','linestyle','-');
-clabel(C,hT,v,'LabelSpacing',1000,'Fontsize',10)    
+clabel(C,hT,v,'LabelSpacing',700,'Fontsize',10)    %
 caxis([-60 60])
 c=colorbar;
 title(c,{'V','(cm/s)'})
@@ -213,7 +218,7 @@ saveas(crofig,[path_output, 'Vcgsection_param',num2str(prmt),'.png'])
 close(crofig)
 
 
-filenameS = [path_output, 'vel_param',num2str(prmt),'.mat'];
+filenameS = [path_io, 'vel_param',num2str(prmt),'.mat'];
 save(filenameS,'velG','velC')
 
 

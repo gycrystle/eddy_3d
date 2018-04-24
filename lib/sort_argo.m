@@ -6,9 +6,9 @@ run(['./paths.m']);
 %
 %name  = {'6902770','3901853','6903204','6900422'};
 %
-tmin=find(time(:,1)==tmin(1) & time(:,2)==tmin(2) & time(:,3)==tmin(3));
-tmax=find(time(:,1)==tmax(1) & time(:,2)==tmax(2) & time(:,3)==tmax(3));
-spread=tmin:tmax;
+tminn=find(time(:,1)==tmin(1) & time(:,2)==tmin(2) & time(:,3)==tmin(3));
+tmaxx=find(time(:,1)==tmax(1) & time(:,2)==tmax(2) & time(:,3)==tmax(3));
+spread=tminn:tmaxx;
 %
 % [dday,~] = find(lon(:,argo_id)>eddy_lon(1) & lon(:,argo_id)<eddy_lon(2) & ...
 %     lat(:,argo_id)>eddy_lat(1) & lat(:,argo_id)<eddy_lat(2) ...
@@ -81,8 +81,8 @@ for a = 1:argonumber;%:length(name)
     for i = 1:length(spread)
     xs=[];
     ys=[];
-    xs = [mLon  x(i,a)];
-    ys = [mLat  y(i,a)];   
+    xs = [mLon(i)  x(i,a)];
+    ys = [mLat(i)  y(i,a)];   
     [radius(i,a) angle(i,a)]= sw_dist(ys,xs,'km');
     end
     [sx(:,a),sy(:,a)] = pol2cart(angle(:,a)*pi/180,radius(:,a));

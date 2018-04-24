@@ -1,4 +1,4 @@
-%clearvars -except eddy_center eddy path_output path_io;
+clearvars -except eddy* path* no_param;
 clc;
 %run(['./paths.m']);
 %Load Fields
@@ -18,14 +18,14 @@ figmld   = 0;
 flagfig2 = 1; 
 yparname={'\deltatemp_{anom}', '\deltasal_{anom}','\delta\rho_{anom}' };
 yPARM = {yparname{f},'B','Rmax','\alpha'};
-yparlim={[0 .2], [0 .2], [-.5 0]} ;
-yLIMS = {yparlim{f},[-1 1]*1e-4,[0 60],[0 4]};
+yparlim={[0 3], [0 .2], [-.8 0]} ;
+yLIMS = {yparlim{f},[-1 1]*1e-4,[25 60],[1.5 5.5]};
 
-for param = 3%:4
+for param = 2:4
 
 namefig2 = [path_output, 'fit',num2str(frame),'_',num2str(field{f}),'_param',num2str(param),'.png'];
 
-filesave = ['./fitvars/', 'sortN_',num2str(field{f}),'_fitparam',num2str(param),'.mat'];
+filesave = [path_io, 'sortN_',num2str(field{f}),'_fitparam',num2str(param),'.mat'];
 load(filesave)
 
 if figmld
@@ -35,9 +35,9 @@ maxmld = nanmax(mld);
 end
 
 % Start the evaluation
-sdeep = 1:400;
-pres  = Z(sdeep);
-r     = -100:1:100;
+sdeep = 20:200;
+pres  = Z(sdeep);%
+r     = -120:1:120;
    
 Lewq =[];
 Cewq =[];
@@ -47,7 +47,8 @@ x = distance';
 y = varA(deep,:);
 
        Input = real(lsqFit(deep,:));
-Lewq(deep,:) = funFit(Input,r);
+       eval(['Lewq(deep,:) = funFit',num2str(param), '(Input,r);']);  
+%Lewq(deep,:) = funFit(Input,r);
 
    
  if flagfig1
@@ -67,14 +68,14 @@ end
         if param ==2 && pp ==param
 
             subplot(2,2,pp+1)
-            plot(pres,lsqFit(:,pp),'k')
+            plot(pres,lsqFit(sdeep,pp),'k')
             xlabel('Pressure (dbar)')
             ylim([yLIMS{pp+1}])
             ylabel(yPARM{pp+1})
             hold on    
         else
             subplot(2,2,pp)
-            plot(pres,lsqFit(:,pp),'k')
+            plot(pres,lsqFit(sdeep,pp),'k')
             xlabel('Pressure (dbar)')
             ylim([yLIMS{pp}])
             ylabel(yPARM{pp})
@@ -92,7 +93,7 @@ for i = 2
     
 ewq = real(var);
 hfig = figure;
-pcolor(r,pres(sdeep,:),ewq(sdeep,:)),shading flat;
+pcolor(r,pres(:,:),ewq(sdeep,:)),shading flat;
 axis ij
 caxislim={[-2 2], [-0.4 0.4], [-1 1]} ;
 caxis(caxislim{f});
@@ -113,7 +114,7 @@ title(c,{varc{f};unitc{f}})
 hold all
 v = {[-3:0.2:3], [-0.4:0.02:0.4], [-1:0.05:1] };
 v{f}(find(v{1,f}==0))=[];
-[C, hT]=contour(r,pres,ewq,v{f},'k');
+[C, hT]=contour(r,pres,ewq(sdeep,:),v{f},'k');
 set(hT,'LineWidth',0.5,'Color','k','linestyle','-');
 clabel(C,hT,v{f},'LabelSpacing',100,'Fontsize',7);    
 set(ax,'linewidth',1)

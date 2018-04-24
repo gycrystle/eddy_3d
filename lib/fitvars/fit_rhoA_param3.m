@@ -1,25 +1,30 @@
 
 % clearvars -except eddy eddy_center no_param;
+clearvars -except eddy* path* ;
 % clc;close all
 % run(['../paths.m']);
 %Load directories & paths
 %................................
 computer ='/home/cgreace/tuto1/';
 %
-path_io = ['',computer,'eddy3D/io/']
+path_io = ['',computer,'eddy3D/io/'];
 warning off
 
 %LOAD FIELDS
-field = {'tempA','salA','rhoA'};      f = 3; 
-disp(['----- Field: ',num2str(field{f}), '-----'])
+field = {'tempA','salA','rhoA'};     
+fields= {'temp','sal','rho'};
+for f =1:3; 
+disp(['----- Field: ',num2str(field{f}), '-----']);
 
 %load('../../io/sortN.mat','Nsrho','Nsort_rad','pres')
-load('../../io/sortI.mat','Isrho','Isort_rad','pres')
+load([path_io, 'sortI.mat']);%,'Isrho','Isort_rad','pres'
   distance = Isort_rad;%Nsort_rad;
-       var = Isrho;    
-load('../../io/sortO.mat','Osrho','mPrhoout')
-load('../../io/ref_pro.mat','autumn')
-mPvar = autumn.mrho; %%% change the reference 
+  eval(['var = Is',num2str(fields{f})]);
+       %var = Isrho;    
+load([path_io, 'sortO.mat'],'Osrho','mPrhoout');
+load([path_io, 'ref_pro.mat'],'autumn');
+eval(['mPvar = autumn.m',num2str(fields{f})]);
+%mPvar = autumn.mrho; %%% change the reference 
 ref_varOut = repmat(mPvar,1,length(distance));
       varA = (var - ref_varOut);
        Z = pres(:,1);   
@@ -35,10 +40,10 @@ filesave = [path_io, 'sortN_',num2str(field{f}),'_fitparam3.mat'];
        
 %FITTING 
 %First guess fitting parameters
-     Ta0 = -0.5;
-     R0 = 30;
+     Ta0 = 0;
+     R0 = 50;
  coef_0 = 1e-6;
-alpha_0 = 4.0;
+alpha_0 = 5.0;
 %Input_0 = [Ta0,coef_0,R0];
 Input_0 = [Ta0,coef_0,R0,alpha_0];
 
@@ -131,3 +136,4 @@ save(filesave,'lsq*','funFit','Z','Rsquare',...
           'distance','var','ref_varOut','varA','see')
 end
 
+end
